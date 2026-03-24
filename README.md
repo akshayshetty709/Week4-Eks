@@ -149,86 +149,156 @@ Copy the **EXTERNAL-IP** of frontend service and open in browser.
 
 # 📊 MONITORING SETUP (STEP-BY-STEP)
 
-## 🔹 Step 1: Add Helm Repo
-
-```
+🔹 Step 1: Add Helm Repository
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
-```
 
----
+✔ This downloads official charts for:
 
-## 🔹 Step 2: Install Prometheus + Grafana Stack
-
-```
+Prometheus
+Grafana
+AlertManager
+🔹 Step 2: Install kube-prometheus-stack
 helm install monitoring prometheus-community/kube-prometheus-stack
-```
 
-This installs:
+👉 This creates everything automatically:
 
-* Prometheus (metrics collection)
-* Grafana (dashboard)
-* AlertManager (alerts)
-
----
-
-## 🔹 Step 3: Verify Installation
-
-```
+Prometheus server
+Grafana dashboard
+AlertManager
+Node Exporter
+kube-state-metrics
+🔹 Step 3: Verify Installation
 kubectl get pods
-```
 
-Look for:
+✔ You should see:
 
-* prometheus
-* grafana
-* alertmanager
+monitoring-grafana
+monitoring-kube-prometheus-prometheus
+monitoring-kube-prometheus-alertmanager
+monitoring-node-exporter
 
----
+👉 If pods are not Running, fix before proceeding.
 
-## 🔹 Step 4: Access Grafana Dashboard
-
-```
+🔹 Step 4: Access Grafana Dashboard
 kubectl port-forward svc/monitoring-grafana 3000:80
-```
 
-Open:
+Open in browser:
 
-```
 http://localhost:3000
-```
-
-### Login:
-
-```
+🔐 Login Credentials:
 Username: admin
 Password: prom-operator
-```
+🔹 Step 5: Verify Prometheus Connection
 
----
+Inside Grafana:
 
-## 🔹 Step 5: Import Dashboards
+👉 Go to:
 
-In Grafana:
+Settings → Data Sources → Prometheus
 
-* Go to **Dashboards → Import**
-* Use IDs:
+✔ Should already be configured
+✔ URL:
 
-  * 315 (Kubernetes cluster monitoring)
-  * 1860 (Node exporter)
+http://monitoring-kube-prometheus-prometheus
+🔹 Step 6: Import Dashboards (IMPORTANT)
 
----
+Go to:
 
-## 🔹 Step 6: Monitor Your Application
+Dashboards → Import
 
-You can now track:
+Use these IDs:
 
-* Pod CPU usage
-* Memory usage
-* Pod restarts
-* Node health
-* Network traffic
+Dashboard	ID
+Kubernetes Cluster	315
+Node Exporter	1860
+Kubernetes Pods	6417
+🔥 Step 7: Monitor YOUR Application (CRITICAL PART)
 
+By default:
+👉 Only cluster metrics are visible
+👉 Your app metrics are NOT included yet
+
+✅ Option 1: Basic Monitoring (No code change)
+
+Filter by namespace:
+
+namespace = three-tier
+
+You’ll see:
+
+Pod CPU usage
+Memory usage
+Pod restarts
+🚀 Option 2: Advanced (REAL-TIME APP METRICS)
+🔹 Step 7.1: Install metrics library in backend
+npm install prom-client
+🔹 Step 7.2: Update backend code
+
+Add in app.js:
+
+const client = require("prom-client");
+
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics();
+
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", client.register.contentType);
+  res.end(await client.register.metrics());
+});
+🔹 Step 7.3: Enable Prometheus scraping
+
+Update backend deployment:
+
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "3000"
+    prometheus.io/path: "/metrics"
+
+✔ Now Prometheus collects:
+
+Request count
+Response time
+Custom metrics
+📧 Step 8: EMAIL ALERTING (REAL SETUP)
+🔹 Step 8.1: Edit AlertManager config
+kubectl edit secret alertmanager-monitoring-kube-prometheus-alertmanager
+🔹 Add email configuration:
+receivers:
+- name: email-alert
+  email_configs:
+  - to: "your-email@gmail.com"
+    from: "your-email@gmail.com"
+    smarthost: smtp.gmail.com:587
+    auth_username: "your-email@gmail.com"
+    auth_password: "your-app-password"
+🔹 Step 8.2: Create Alert Rule
+groups:
+- name: app-alerts
+  rules:
+  - alert: HighCPUUsage
+    expr: sum(rate(container_cpu_usage_seconds_total[1m])) > 0.5
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      description: "High CPU usage detected"
+🔹 Step 8.3: Test Alerts
+kubectl scale deployment backend --replicas=0 -n three-tier
+
+👉 You should receive an email alert 🚀
+
+🔗 FINAL MONITORING FLOW
+Application Pods
+     ↓
+Prometheus (collects metrics)
+     ↓
+Grafana (visualizes dashboards)
+     ↓
+AlertManager (checks rules)
+     ↓
+Email Notification
 ---
 
 # 📧 ALERTING SETUP (EMAIL)
