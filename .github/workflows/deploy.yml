@@ -40,3 +40,15 @@ jobs:
       run: |
         aws eks update-kubeconfig --name my-cluster --region ap-south-1
         kubectl apply -f k8s/
+
+    -  name: Send Email Notification
+       uses: dawidd6/action-send-mail@v3
+       with:
+         server_address: smtp.gmail.com
+         server_port: 465
+         username: ${{ secrets.EMAIL_USERNAME }}
+         password: ${{ secrets.EMAIL_PASSWORD }}
+         subject: "Deployment Successful 🚀"
+         body: "Your application has been successfully deployed to EKS cluster."
+         to: yourmail@gmail.com
+         from: GitHub Actions
