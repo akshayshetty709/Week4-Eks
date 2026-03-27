@@ -13,6 +13,11 @@ spec:
       labels:
         app: backend
     spec:
+      tolerations:
+      - key: "eks.amazonaws.com/compute-class"
+        operator: "Equal"
+        value: "general-purpose"
+        effect: "NoSchedule"
       containers:
       - name: backend
         image: <ECR_BACKEND_IMAGE>
@@ -27,6 +32,7 @@ kind: Service
 metadata:
   name: backend
   namespace: three-tier
+  
 spec:
   selector:
     app: backend

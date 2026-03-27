@@ -4,6 +4,10 @@ on:
   push:
     branches: [ "main" ]
 
+env:
+  AWS_REGION: ap-south-1
+  CLUSTER_NAME: React-cluster  
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -16,39 +20,29 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-        aws-region: ap-south-1
+         aws-region: ap-south-1
 
     - name: Login to ECR
       run: |
-        aws ecr get-login-password --region ap-south-1 \
+        aws ecr get-login-password --region $AWS_REGION  \
         | docker login --username AWS \
         --password-stdin ${{ secrets.ECR_URL }}
 
     - name: Build & Push Backend
       run: |
         docker build -t backend ./backend
-        docker tag backend:latest ${{ secrets.ECR_URL }}/backend:latest
-        docker push ${{ secrets.ECR_URL }}/backend:latest
+        docker tag backend:latest ${{ secrets.ECR_URL }}:latest
+        docker push ${{ secrets.ECR_URL }}:latest
 
     - name: Build & Push Frontend
       run: |
         docker build -t frontend ./frontend
-        docker tag frontend:latest ${{ secrets.ECR_URL }}/frontend:latest
-        docker push ${{ secrets.ECR_URL }}/frontend:latest
+        docker tag frontend:latest ${{ secrets.ECR_URL }}:latest
+        docker push ${{ secrets.ECR_URL }}:latest
 
     - name: Deploy
       run: |
-        aws eks update-kubeconfig --name my-cluster --region ap-south-1
+        aws eks update-kubeconfig --name $CLUSTER_NAME --region $AWS_REGION
         kubectl apply -f k8s/
+        kubectl get all -n three-tier
 
-    -  name: Send Email Notification
-       uses: dawidd6/action-send-mail@v3
-       with:
-         server_address: smtp.gmail.com
-         server_port: 465
-         username: ${{ secrets.EMAIL_USERNAME }}
-         password: ${{ secrets.EMAIL_PASSWORD }}
-         subject: "Deployment Successful 🚀"
-         body: "Your application has been successfully deployed to EKS cluster."
-         to: yourmail@gmail.com
-         from: GitHub Actions

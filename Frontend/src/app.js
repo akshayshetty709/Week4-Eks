@@ -12,7 +12,7 @@ function App() {
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>🚀 3-Tier DevOps Project</h1>
+      <h1>🚀 3-Tier DevOps Project deployed through EKS</h1>
       <h2>{message}</h2>
     </div>
   );
