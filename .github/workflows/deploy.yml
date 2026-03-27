@@ -23,10 +23,7 @@ jobs:
          aws-region: ap-south-1
 
     - name: Login to ECR
-      run: |
-        aws ecr get-login-password --region $AWS_REGION  \
-        | docker login --username AWS \
-        --password-stdin ${{ secrets.ECR_URL }}
+      uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build & Push Backend
       run: |
