@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-ENV CI-false
+ENV CI=false
 RUN  npm run build
 
 FROM nginx:stable-alpine
