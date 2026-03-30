@@ -27,13 +27,13 @@ jobs:
       
     - name: Build & Push Backend
       run: |
-        docker build -t backend ./Backend
+        docker build -t backend:latest ./Backend
         docker tag backend:latest ${{ secrets.ECR_URL }}/backend-app:latest
         docker push ${{ secrets.ECR_URL }}/backend-app:latest
 
     - name: Build & Push Frontend
       run: |
-        docker build -t frontend ./Frontend
+        docker build -t frontend:latest ./Frontend
         docker tag frontend:latest ${{ secrets.ECR_URL }}/frontend-app:latest
         docker push ${{ secrets.ECR_URL }}/frontend-app:latest
 
