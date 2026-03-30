@@ -20,7 +20,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-         aws-region: ap-south-1
+        aws-region: ap-south-1
 
     - name: Login to ECR
       run: |
@@ -30,15 +30,15 @@ jobs:
 
     - name: Build & Push Backend
       run: |
-        docker build -t backend ./Backend
-        docker tag backend:latest ${{ secrets.ECR_URL }}/backend-app:latest
-        docker push ${{ secrets.ECR_URL }}/backend-app:latest
+        docker build -t backend ./backend
+        docker tag backend:latest ${{ secrets.ECR_URL }}:latest
+        docker push ${{ secrets.ECR_URL }}:latest
 
     - name: Build & Push Frontend
       run: |
-        docker build -t frontend ./Frontend
-        docker tag frontend:latest ${{ secrets.ECR_URL }}/frontend-app:latest
-        docker push ${{ secrets.ECR_URL }}/frontend:latest
+        docker build -t frontend ./frontend
+        docker tag frontend:latest ${{ secrets.ECR_URL }}:latest
+        docker push ${{ secrets.ECR_URL }}:latest
 
     - name: Deploy
       run: |
