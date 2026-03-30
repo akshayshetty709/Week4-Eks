@@ -3,8 +3,7 @@ WORKDIR /app
 COPY package*.json .
 RUN npm install
 COPY . .
-ENV CI-false
-RUN npm run build
+RUN CI-false npm run build
 
 FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
