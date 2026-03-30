@@ -8,7 +8,7 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true
 });
 
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
