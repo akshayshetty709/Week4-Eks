@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image:751101364131.dkr.ecr.ap-south-1.amazonaws.com/frontend-app:latest
+        image: 751101364131.dkr.ecr.ap-south-1.amazonaws.com/frontend-app:latest
         ports:
         - containerPort: 80
 ---
@@ -24,8 +24,6 @@ kind: Service
 metadata:
   name: frontend
   namespace: three-tier
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing  
 spec:
   type: LoadBalancer
   selector:

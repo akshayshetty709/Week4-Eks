@@ -20,7 +20,7 @@ spec:
         effect: "NoSchedule"
       containers:
       - name: backend
-        image: <ECR_BACKEND_IMAGE>
+        image: 751101364131.dkr.ecr.ap-south-1.amazonaws.com/backend-app:latest
         env:
         - name: MONGO_URI
           value: mongodb://mongodb:27017/test
