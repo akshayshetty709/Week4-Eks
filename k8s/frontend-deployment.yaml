@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image:751101364131.dkr.ecr.ap-south-1.amazonaws.com/nod
+        image:751101364131.dkr.ecr.ap-south-1.amazonaws.com/frontend-app:latest
         ports:
         - containerPort: 80
 ---
